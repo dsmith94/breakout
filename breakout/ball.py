@@ -34,7 +34,7 @@ class Ball(sprite.Sprite):
         sprite.Sprite.update(self, screen)
 
         """
-        check collision with player
+        check collision with player, and update ball position
         """
 
         # prevent ball from leaving screen
@@ -42,17 +42,22 @@ class Ball(sprite.Sprite):
             self.vx = -self.vx
         if self.y < 0:
             self.vy = -self.vy
+            if self.vx == 0:
+                self.throw()
 
         # if we have bounce with paddle, reverse direction and speed
-        if self.overlap(player):
+        if self.overlap(player.left_paddle):
             self.vy = -(random.random() * 5)
             self.vy -= 5
-            if self.x < player.x + (player.width / 2):
-                self.vx = -(random.random() * 15)
-                self.vx -= 1
-            else:
-                self.vx = (random.random() * 15)
-                self.vx += 1
+            self.vx = -(random.random() * 15)
+            self.vx -= 1
+            player.sound_bounce.play()
+        if self.overlap(player.right_paddle):
+            self.vy = -(random.random() * 5)
+            self.vy -= 5
+            self.vx = (random.random() * 15)
+            self.vx += 1
+            player.sound_bounce.play()
 
         # and draw
         self.__draw(screen)

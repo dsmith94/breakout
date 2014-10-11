@@ -35,8 +35,12 @@ def __events(reg):
             # pause key
             if event.key == pygame.K_p:
                 if reg.game.paused:
+                    pygame.mixer.unpause()
                     reg.game.paused = False
                 else:
+                    pygame.mixer.stop()
+                    sound = pygame.mixer.Sound('./breakout/pause.ogg')
+                    sound.play()
                     reg.game.pause(reg.screen)
 
             # space key to restart when game is over
@@ -44,24 +48,27 @@ def __events(reg):
 
                 if not reg.game.playing:
                     reg.game = None
+                    pygame.mixer.stop()
                     reg.game = game.Game(reg.font)
 
         if event.type == pygame.KEYDOWN:
 
             # exit program on q
-            if event.key == pygame.K_q:
+            if event.key == pygame.K_ESCAPE:
                 pygame.quit()
                 sys.exit()
 
             # left key
             if event.key == pygame.K_LEFT:
-                if player.x > 0:
-                    player.mx = -20
+                if player.left_paddle.x > 0:
+                    player.left_paddle.mx = -10
+                    player.right_paddle.mx = -10
 
             # right key
             if event.key == pygame.K_RIGHT:
-                if player.x < reg.screen_width - player.width:
-                    player.mx = 20
+                if player.right_paddle.x + player.right_paddle.width < reg.screen_width:
+                    player.left_paddle.mx = 10
+                    player.right_paddle.mx = 10
 
         if player.x < 0:
             player.x = 0
@@ -111,6 +118,9 @@ def __ball(reg):
 
         # ball is lost, take away life
         reg.game.round.lives -= 1
+        if reg.game.round.lives == 2:
+            sound_music = pygame.mixer.Sound('./breakout/music.ogg')
+            sound_music.play()
 
         # pause for a second with a timer if lives remain
         if reg.game.round.lives > 0:
@@ -120,6 +130,9 @@ def __ball(reg):
 
             # game is over, we are out of lives
             reg.game.playing = False
+            reg.game.round.level.shot = None
+            reg.game.round.player.powerup = None
+            reg.game.round.player.sound_gameover.play()
 
         # remove ball
         reg.game.round.ball = None
@@ -135,8 +148,8 @@ def __staticy(reg):
     for y in xrange(reg.y_offset, 480):
         line_counter += 1
         if line_counter > 4:
-            pygame.draw.aaline(reg.screen, (0, 0, 0), (0, y - 10), (reg.screen_width, y + 10))
-            pygame.draw.aaline(reg.screen, (0, 0, 0), (0, y - 9), (reg.screen_width, y + 12))
+            pygame.draw.aaline(reg.screen, (0, 0, 0), (0, y - 10), (reg.screen_width, y))
+            pygame.draw.aaline(reg.screen, (0, 0, 0), (0, y - 9), (reg.screen_width, y))
             line_counter = 0
     reg.y_offset += 1
     if reg.y_offset > 4:
@@ -152,7 +165,7 @@ def __boot(reg):
     pygame.init()
     pygame.key.set_repeat(1, 1)
     reg.clock = pygame.time.Clock()
-    reg.screen = pygame.display.set_mode(reg.screen_size)
+    reg.screen = pygame.display.set_mode(reg.screen_size, pygame.FULLSCREEN)
     reg.font = pygame.font.Font("./breakout/digiface.ttf", 40)
     reg.game = game.Game(reg.font)
 

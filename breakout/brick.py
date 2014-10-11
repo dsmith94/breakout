@@ -15,8 +15,8 @@ class Brick(sprite.Sprite):
         Create new instance of brick at x, y
         """
 
-        self.width = 20
-        self.height = 5
+        self.width = 40
+        self.height = 10
         self.x = x
         self.y = y
         self.score = 10
